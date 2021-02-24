@@ -11,26 +11,27 @@ export enum SchemaType {
     object,         // compound object
 }
 
-class AtomSchema <VT, IsNullable, IsOptional> {
+export class AtomSchema <VT, IsNullable, IsOptional> {
     constructor (
         readonly type: SchemaType.atom,
         readonly value: VT,
         readonly isNullable: IsNullable,
         readonly isOptional: IsOptional,
+        readonly isa: (v) => string | null,         // 傳回錯誤訊息
     ) {}
 
     nullable () {
         return new AtomSchema<VT, true, IsOptional> (
-            SchemaType.atom, this.value, true, this.isOptional);
+            SchemaType.atom, this.value, true, this.isOptional, this.isa);
     }
 
     optional () {
         return new AtomSchema<VT, IsNullable, true> (
-            SchemaType.atom, this.value, this.isNullable, true);
+            SchemaType.atom, this.value, this.isNullable, true, this.isa);
     }
 }
 
-class ArraySchema <InnerSchema extends Schema, IsNullable, IsOptional> {
+export class ArraySchema <InnerSchema extends Schema, IsNullable, IsOptional> {
     constructor (
         readonly type: SchemaType.array,
         readonly innerSchema: InnerSchema,
@@ -49,7 +50,7 @@ class ArraySchema <InnerSchema extends Schema, IsNullable, IsOptional> {
     }
 }
 
-class ObjectSchema <InnerSchema extends InnerSchemaForObjectSchema, IsNullable, IsOptional> {
+export class ObjectSchema <InnerSchema extends InnerSchemaForObjectSchema, IsNullable, IsOptional> {
     constructor (
         readonly type: SchemaType.object,
         readonly innerSchema: InnerSchema,
@@ -73,13 +74,13 @@ export type Schema =
     ArraySchema<Schema, boolean, boolean> |
     ObjectSchema<InnerSchemaForObjectSchema, boolean, boolean>;
 
-type InnerSchemaForObjectSchema = {
+export type InnerSchemaForObjectSchema = {
     [field: string]: Schema,
 }
 
 export namespace Schema {
-    export function value <T> () {
-        return new AtomSchema<T | undefined, false, false>(SchemaType.atom, undefined, false ,false);
+    export function value <T> (isa: (v) => string | null) {
+        return new AtomSchema<T | undefined, false, false>(SchemaType.atom, undefined, false, false, isa);
     }
 
     export function array <S extends Schema> (innerSchema: S) {

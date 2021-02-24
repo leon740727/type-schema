@@ -6,7 +6,7 @@
  * 2. compound: 裡面的值有另外的 inner schema 來描述。又分成二種 object, array
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Schema = exports.SchemaType = void 0;
+exports.Schema = exports.ObjectSchema = exports.ArraySchema = exports.AtomSchema = exports.SchemaType = void 0;
 var SchemaType;
 (function (SchemaType) {
     SchemaType[SchemaType["atom"] = 0] = "atom";
@@ -14,19 +14,21 @@ var SchemaType;
     SchemaType[SchemaType["object"] = 2] = "object";
 })(SchemaType = exports.SchemaType || (exports.SchemaType = {}));
 class AtomSchema {
-    constructor(type, value, isNullable, isOptional) {
+    constructor(type, value, isNullable, isOptional, isa) {
         this.type = type;
         this.value = value;
         this.isNullable = isNullable;
         this.isOptional = isOptional;
+        this.isa = isa;
     }
     nullable() {
-        return new AtomSchema(SchemaType.atom, this.value, true, this.isOptional);
+        return new AtomSchema(SchemaType.atom, this.value, true, this.isOptional, this.isa);
     }
     optional() {
-        return new AtomSchema(SchemaType.atom, this.value, this.isNullable, true);
+        return new AtomSchema(SchemaType.atom, this.value, this.isNullable, true, this.isa);
     }
 }
+exports.AtomSchema = AtomSchema;
 class ArraySchema {
     constructor(type, innerSchema, isNullable, isOptional) {
         this.type = type;
@@ -41,6 +43,7 @@ class ArraySchema {
         return new ArraySchema(SchemaType.array, this.innerSchema, this.isNullable, true);
     }
 }
+exports.ArraySchema = ArraySchema;
 class ObjectSchema {
     constructor(type, innerSchema, isNullable, isOptional) {
         this.type = type;
@@ -55,10 +58,11 @@ class ObjectSchema {
         return new ObjectSchema(SchemaType.object, this.innerSchema, this.isNullable, true);
     }
 }
+exports.ObjectSchema = ObjectSchema;
 var Schema;
 (function (Schema) {
-    function value() {
-        return new AtomSchema(SchemaType.atom, undefined, false, false);
+    function value(isa) {
+        return new AtomSchema(SchemaType.atom, undefined, false, false, isa);
     }
     Schema.value = value;
     function array(innerSchema) {

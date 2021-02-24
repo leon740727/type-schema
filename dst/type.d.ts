@@ -9,16 +9,17 @@ export declare enum SchemaType {
     array = 1,
     object = 2
 }
-declare class AtomSchema<VT, IsNullable, IsOptional> {
+export declare class AtomSchema<VT, IsNullable, IsOptional> {
     readonly type: SchemaType.atom;
     readonly value: VT;
     readonly isNullable: IsNullable;
     readonly isOptional: IsOptional;
-    constructor(type: SchemaType.atom, value: VT, isNullable: IsNullable, isOptional: IsOptional);
+    readonly isa: (v: any) => string | null;
+    constructor(type: SchemaType.atom, value: VT, isNullable: IsNullable, isOptional: IsOptional, isa: (v: any) => string | null);
     nullable(): AtomSchema<VT, true, IsOptional>;
     optional(): AtomSchema<VT, IsNullable, true>;
 }
-declare class ArraySchema<InnerSchema extends Schema, IsNullable, IsOptional> {
+export declare class ArraySchema<InnerSchema extends Schema, IsNullable, IsOptional> {
     readonly type: SchemaType.array;
     readonly innerSchema: InnerSchema;
     readonly isNullable: IsNullable;
@@ -27,7 +28,7 @@ declare class ArraySchema<InnerSchema extends Schema, IsNullable, IsOptional> {
     nullable(): ArraySchema<InnerSchema, true, IsOptional>;
     optional(): ArraySchema<InnerSchema, IsNullable, true>;
 }
-declare class ObjectSchema<InnerSchema extends InnerSchemaForObjectSchema, IsNullable, IsOptional> {
+export declare class ObjectSchema<InnerSchema extends InnerSchemaForObjectSchema, IsNullable, IsOptional> {
     readonly type: SchemaType.object;
     readonly innerSchema: InnerSchema;
     readonly isNullable: IsNullable;
@@ -37,11 +38,11 @@ declare class ObjectSchema<InnerSchema extends InnerSchemaForObjectSchema, IsNul
     optional(): ObjectSchema<InnerSchema, IsNullable, true>;
 }
 export declare type Schema = AtomSchema<any, boolean, boolean> | ArraySchema<Schema, boolean, boolean> | ObjectSchema<InnerSchemaForObjectSchema, boolean, boolean>;
-declare type InnerSchemaForObjectSchema = {
+export declare type InnerSchemaForObjectSchema = {
     [field: string]: Schema;
 };
 export declare namespace Schema {
-    function value<T>(): AtomSchema<T | undefined, false, false>;
+    function value<T>(isa: (v: any) => string | null): AtomSchema<T | undefined, false, false>;
     function array<S extends Schema>(innerSchema: S): ArraySchema<S, false, false>;
     function object<S extends InnerSchemaForObjectSchema>(innerSchema: S): ObjectSchema<S, false, false>;
 }
