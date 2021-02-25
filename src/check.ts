@@ -1,6 +1,7 @@
 import { toPairs } from 'ramda';
 import { Optional } from 'types';
 import { Schema, SchemaType, AtomSchema, InnerSchemaForObjectSchema } from './type';
+import { pair } from './util';
 
 type Error = {
     paths: string[],
@@ -84,8 +85,4 @@ function checkAtom (schema: AtomSchema<any, boolean, boolean, any>, value): Opti
         paths: [],
         msg,
     }));
-}
-
-function pair <A, B> (a: A, b: B): [A, B] {
-    return [a, b];
 }

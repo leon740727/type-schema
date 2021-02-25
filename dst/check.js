@@ -4,6 +4,7 @@ exports.check = void 0;
 const ramda_1 = require("ramda");
 const types_1 = require("types");
 const type_1 = require("./type");
+const util_1 = require("./util");
 function check(schema, value) {
     return _check(schema, value).map(error2string);
 }
@@ -65,7 +66,7 @@ function checkArray(schema, value) {
     const errors = value
         .map((v, idx) => {
         return _check(schema, v)
-            .map(error => pair(idx, error));
+            .map(error => util_1.pair(idx, error));
     });
     return types_1.Optional.of(types_1.Optional.filter(errors)[0])
         .map(([idx, error]) => ({
@@ -79,7 +80,4 @@ function checkAtom(schema, value) {
         paths: [],
         msg,
     }));
-}
-function pair(a, b) {
-    return [a, b];
 }
