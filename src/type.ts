@@ -11,23 +11,29 @@ export enum SchemaType {
     object,         // compound object
 }
 
-export class AtomSchema <VT, IsNullable, IsOptional> {
+export class AtomSchema <VT, IsNullable, IsOptional, VT2> {
     constructor (
         readonly type: SchemaType.atom,
         readonly value: VT,
         readonly isNullable: IsNullable,
         readonly isOptional: IsOptional,
         readonly isa: (v) => string | null,         // 傳回錯誤訊息
+        readonly transform: (v: VT) => VT2,
     ) {}
 
     nullable () {
-        return new AtomSchema<VT, true, IsOptional> (
-            SchemaType.atom, this.value, true, this.isOptional, this.isa);
+        return new AtomSchema<VT, true, IsOptional, VT2> (
+            SchemaType.atom, this.value, true, this.isOptional, this.isa, this.transform);
     }
 
     optional () {
-        return new AtomSchema<VT, IsNullable, true> (
-            SchemaType.atom, this.value, this.isNullable, true, this.isa);
+        return new AtomSchema<VT, IsNullable, true, VT2> (
+            SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform);
+    }
+
+    setTransform <T2> (fn: (v: stripUndefined<VT>) => T2) {
+        return new AtomSchema<VT, IsNullable, IsOptional, T2>(
+            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn);
     }
 }
 
@@ -70,7 +76,7 @@ export class ObjectSchema <InnerSchema extends InnerSchemaForObjectSchema, IsNul
 }
 
 export type Schema =
-    AtomSchema<any, boolean, boolean> |
+    AtomSchema<any, boolean, boolean, any> |
     ArraySchema<Schema, boolean, boolean> |
     ObjectSchema<InnerSchemaForObjectSchema, boolean, boolean>;
 
@@ -80,7 +86,8 @@ export type InnerSchemaForObjectSchema = {
 
 export namespace Schema {
     export function value <T> (isa: (v) => string | null) {
-        return new AtomSchema<T | undefined, false, false>(SchemaType.atom, undefined, false, false, isa);
+        return new AtomSchema<T | undefined, false, false, T>(
+            SchemaType.atom, undefined, false, false, isa, (v: T) => v);
     }
 
     export function array <S extends Schema> (innerSchema: S) {
@@ -95,27 +102,29 @@ export namespace Schema {
 type isRequired <S, T> = T extends { isOptional: false } ? S : never;
 type isOptional <S, T> = T extends { isOptional: true } ? S : never;
 
-type requiredFields <T extends InnerSchemaForObjectSchema> = {
-    [f in keyof T as isRequired<f, T[f]>]: build<T[f]>;
+type requiredFields <T extends InnerSchemaForObjectSchema, transformed extends boolean> = {
+    [f in keyof T as isRequired<f, T[f]>]: build<T[f], transformed>;
 }
 
-type optionalFields <T extends InnerSchemaForObjectSchema> = {
-    [f in keyof T as isOptional<f, T[f]>]?: build<T[f]>;
+type optionalFields <T extends InnerSchemaForObjectSchema, transformed extends boolean> = {
+    [f in keyof T as isOptional<f, T[f]>]?: build<T[f], transformed>;
 }
 
 type _stripUndefined <T> = T extends undefined ? never : T;
 type stripUndefined <T> = _stripUndefined<T> extends never ? T : _stripUndefined<T>;
 
-type fetchAtom <T extends Schema> = T extends { type: SchemaType.atom } ? T : never;
-type fetchArray <T extends Schema> = T extends { type: SchemaType.array } ? T : never;
-type fetchObject <T extends Schema> = T extends { type: SchemaType.object } ? T : never;
+export type fetchAtom <T extends Schema> = T extends { type: SchemaType.atom } ? T : never;
+export type fetchArray <T extends Schema> = T extends { type: SchemaType.array } ? T : never;
+export type fetchObject <T extends Schema> = T extends { type: SchemaType.object } ? T : never;
 
-type _build <T extends Schema> =
+type _build <T extends Schema, transformed extends boolean> =
     T extends { type: SchemaType.object } ?
-        requiredFields<fetchObject<T>['innerSchema']> & optionalFields<fetchObject<T>['innerSchema']>:
+        requiredFields<fetchObject<T>['innerSchema'], transformed> & optionalFields<fetchObject<T>['innerSchema'], transformed>:
     T extends { type: SchemaType.array } ?            // array
-        build<fetchArray<T>['innerSchema']>[]:
+        build<fetchArray<T>['innerSchema'], transformed>[]:
+    transformed extends true ?
+        ReturnType<fetchAtom<T>['transform']>:
     stripUndefined<fetchAtom<T>['value']>;
 
-export type build <T extends Schema> = T extends { isNullable: true } ?
-    _build<T> | null: _build<T>;
+export type build <T extends Schema, transformed extends boolean> = T extends { isNullable: true } ?
+    _build<T, transformed> | null: _build<T, transformed>;

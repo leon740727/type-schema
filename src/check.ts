@@ -1,6 +1,6 @@
 import { toPairs } from 'ramda';
 import { Optional } from 'types';
-import { Schema, SchemaType, AtomSchema, ArraySchema, ObjectSchema, InnerSchemaForObjectSchema } from './type';
+import { Schema, SchemaType, AtomSchema, InnerSchemaForObjectSchema } from './type';
 
 type Error = {
     paths: string[],
@@ -78,7 +78,7 @@ function checkArray (schema: Schema, value: any[]): Optional<Error> {
     }));
 }
 
-function checkAtom (schema: AtomSchema<any, boolean, boolean>, value): Optional<Error> {
+function checkAtom (schema: AtomSchema<any, boolean, boolean, any>, value): Optional<Error> {
     return Optional.of(schema.isa(value))
     .map(msg => ({
         paths: [],

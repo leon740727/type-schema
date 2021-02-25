@@ -14,18 +14,23 @@ var SchemaType;
     SchemaType[SchemaType["object"] = 2] = "object";
 })(SchemaType = exports.SchemaType || (exports.SchemaType = {}));
 class AtomSchema {
-    constructor(type, value, isNullable, isOptional, isa) {
+    constructor(type, value, isNullable, isOptional, isa, // 傳回錯誤訊息
+    transform) {
         this.type = type;
         this.value = value;
         this.isNullable = isNullable;
         this.isOptional = isOptional;
         this.isa = isa;
+        this.transform = transform;
     }
     nullable() {
-        return new AtomSchema(SchemaType.atom, this.value, true, this.isOptional, this.isa);
+        return new AtomSchema(SchemaType.atom, this.value, true, this.isOptional, this.isa, this.transform);
     }
     optional() {
-        return new AtomSchema(SchemaType.atom, this.value, this.isNullable, true, this.isa);
+        return new AtomSchema(SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform);
+    }
+    setTransform(fn) {
+        return new AtomSchema(SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn);
     }
 }
 exports.AtomSchema = AtomSchema;
@@ -62,7 +67,7 @@ exports.ObjectSchema = ObjectSchema;
 var Schema;
 (function (Schema) {
     function value(isa) {
-        return new AtomSchema(SchemaType.atom, undefined, false, false, isa);
+        return new AtomSchema(SchemaType.atom, undefined, false, false, isa, (v) => v);
     }
     Schema.value = value;
     function array(innerSchema) {
