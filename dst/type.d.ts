@@ -16,29 +16,35 @@ export declare class AtomSchema<VT, IsNullable, IsOptional, VT2> {
     readonly isOptional: IsOptional;
     readonly isa: (v: any) => string | null;
     readonly transform: (v: VT) => VT2;
+    readonly extra: any;
     constructor(type: SchemaType.atom, value: VT, isNullable: IsNullable, isOptional: IsOptional, isa: (v: any) => string | null, // 傳回錯誤訊息
-    transform: (v: VT) => VT2);
+    transform: (v: VT) => VT2, extra: any);
     nullable(): AtomSchema<VT, true, IsOptional, VT2>;
     optional(): AtomSchema<VT, IsNullable, true, VT2>;
     setTransform<T2>(fn: (v: stripUndefined<VT>) => T2): AtomSchema<VT, IsNullable, IsOptional, T2>;
+    setExtra(extra: any): AtomSchema<VT, IsNullable, IsOptional, VT2>;
 }
 export declare class ArraySchema<InnerSchema extends Schema, IsNullable, IsOptional> {
     readonly type: SchemaType.array;
     readonly innerSchema: InnerSchema;
     readonly isNullable: IsNullable;
     readonly isOptional: IsOptional;
-    constructor(type: SchemaType.array, innerSchema: InnerSchema, isNullable: IsNullable, isOptional: IsOptional);
+    readonly extra: any;
+    constructor(type: SchemaType.array, innerSchema: InnerSchema, isNullable: IsNullable, isOptional: IsOptional, extra: any);
     nullable(): ArraySchema<InnerSchema, true, IsOptional>;
     optional(): ArraySchema<InnerSchema, IsNullable, true>;
+    setExtra(extra: any): ArraySchema<InnerSchema, IsNullable, IsOptional>;
 }
 export declare class ObjectSchema<InnerSchema extends InnerSchemaForObjectSchema, IsNullable, IsOptional> {
     readonly type: SchemaType.object;
     readonly innerSchema: InnerSchema;
     readonly isNullable: IsNullable;
     readonly isOptional: IsOptional;
-    constructor(type: SchemaType.object, innerSchema: InnerSchema, isNullable: IsNullable, isOptional: IsOptional);
+    readonly extra: any;
+    constructor(type: SchemaType.object, innerSchema: InnerSchema, isNullable: IsNullable, isOptional: IsOptional, extra: any);
     nullable(): ObjectSchema<InnerSchema, true, IsOptional>;
     optional(): ObjectSchema<InnerSchema, IsNullable, true>;
+    setExtra(extra: any): ObjectSchema<InnerSchema, IsNullable, IsOptional>;
 }
 export declare type Schema = AtomSchema<any, boolean, boolean, any> | ArraySchema<Schema, boolean, boolean> | ObjectSchema<InnerSchemaForObjectSchema, boolean, boolean>;
 export declare type InnerSchemaForObjectSchema = {

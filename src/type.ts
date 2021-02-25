@@ -19,21 +19,27 @@ export class AtomSchema <VT, IsNullable, IsOptional, VT2> {
         readonly isOptional: IsOptional,
         readonly isa: (v) => string | null,         // 傳回錯誤訊息
         readonly transform: (v: VT) => VT2,
+        readonly extra: any,                        // 額外附加的資料
     ) {}
 
     nullable () {
         return new AtomSchema<VT, true, IsOptional, VT2> (
-            SchemaType.atom, this.value, true, this.isOptional, this.isa, this.transform);
+            SchemaType.atom, this.value, true, this.isOptional, this.isa, this.transform, this.extra);
     }
 
     optional () {
         return new AtomSchema<VT, IsNullable, true, VT2> (
-            SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform);
+            SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform, this.extra);
     }
 
     setTransform <T2> (fn: (v: stripUndefined<VT>) => T2) {
         return new AtomSchema<VT, IsNullable, IsOptional, T2>(
-            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn);
+            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn, this.extra);
+    }
+
+    setExtra (extra) {
+        return new AtomSchema<VT, IsNullable, IsOptional, VT2>(
+            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, this.transform, extra);
     }
 }
 
@@ -43,16 +49,22 @@ export class ArraySchema <InnerSchema extends Schema, IsNullable, IsOptional> {
         readonly innerSchema: InnerSchema,
         readonly isNullable: IsNullable,
         readonly isOptional: IsOptional,
+        readonly extra: any,                        // 額外附加的資料
     ) {}
 
     nullable () {
         return new ArraySchema<InnerSchema, true, IsOptional> (
-            SchemaType.array, this.innerSchema, true, this.isOptional);
+            SchemaType.array, this.innerSchema, true, this.isOptional, this.extra);
     }
 
     optional () {
         return new ArraySchema<InnerSchema, IsNullable, true> (
-            SchemaType.array, this.innerSchema, this.isNullable, true);
+            SchemaType.array, this.innerSchema, this.isNullable, true, this.extra);
+    }
+
+    setExtra (extra) {
+        return new ArraySchema<InnerSchema, IsNullable, IsOptional> (
+            SchemaType.array, this.innerSchema, this.isNullable, this.isOptional, extra);
     }
 }
 
@@ -62,16 +74,22 @@ export class ObjectSchema <InnerSchema extends InnerSchemaForObjectSchema, IsNul
         readonly innerSchema: InnerSchema,
         readonly isNullable: IsNullable,
         readonly isOptional: IsOptional,
+        readonly extra: any,                        // 額外附加的資料
     ) {}
 
     nullable () {
         return new ObjectSchema<InnerSchema, true, IsOptional> (
-            SchemaType.object, this.innerSchema, true, this.isOptional);
+            SchemaType.object, this.innerSchema, true, this.isOptional, this.extra);
     }
 
     optional () {
         return new ObjectSchema<InnerSchema, IsNullable, true> (
-            SchemaType.object, this.innerSchema, this.isNullable, true);
+            SchemaType.object, this.innerSchema, this.isNullable, true, this.extra);
+    }
+
+    setExtra (extra) {
+        return new ObjectSchema<InnerSchema, IsNullable, IsOptional> (
+            SchemaType.object, this.innerSchema, this.isNullable, this.isOptional, extra);
     }
 }
 
@@ -87,15 +105,15 @@ export type InnerSchemaForObjectSchema = {
 export namespace Schema {
     export function value <T> (isa: (v) => string | null) {
         return new AtomSchema<T | undefined, false, false, T>(
-            SchemaType.atom, undefined, false, false, isa, (v: T) => v);
+            SchemaType.atom, undefined, false, false, isa, (v: T) => v, null);
     }
 
     export function array <S extends Schema> (innerSchema: S) {
-        return new ArraySchema<S, false, false>(SchemaType.array, innerSchema, false, false);
+        return new ArraySchema<S, false, false>(SchemaType.array, innerSchema, false, false, null);
     }
 
     export function object <S extends InnerSchemaForObjectSchema> (innerSchema: S) {
-        return new ObjectSchema<S, false, false>(SchemaType.object, innerSchema, false, false);
+        return new ObjectSchema<S, false, false>(SchemaType.object, innerSchema, false, false, null);
     }
 }
 
