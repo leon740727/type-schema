@@ -7,7 +7,10 @@ export namespace Schema {
     export const object = _Schema.object;
     export const array = _Schema.array;
     export type buildType <T extends _Schema> = build<T, false>;
-    export const check = _check;
+
+    export function check (schema: _Schema, value): string | null {
+        return _check(schema, value).orNull();
+    }
 
     type Result <R> = [string, null] | [null, R];
     export function transform <S extends _Schema> (schema: S, value): Result<build<S, true>> {

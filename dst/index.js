@@ -9,7 +9,10 @@ var Schema;
     Schema.value = type_1.Schema.value;
     Schema.object = type_1.Schema.object;
     Schema.array = type_1.Schema.array;
-    Schema.check = check_1.check;
+    function check(schema, value) {
+        return check_1.check(schema, value).orNull();
+    }
+    Schema.check = check;
     function transform(schema, value) {
         return transform_1.transform(schema, value).either(error => [error, null], value => [null, value]);
     }
