@@ -2,7 +2,7 @@ import { Schema, build } from './type';
 export declare const value: typeof Schema.value;
 export declare const object: typeof Schema.object;
 export declare const array: typeof Schema.array;
-export declare type buildType<T extends Schema> = build<T, false>;
+export declare type buildType<T extends Schema, transformed extends boolean = true> = build<T, transformed>;
 export declare function check(schema: Schema, value: any): string | null;
 declare type Result<R> = [string, null] | [null, R];
 export declare function transform<S extends Schema>(schema: S, value: any): Result<build<S, true>>;

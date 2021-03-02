@@ -5,7 +5,7 @@ import { transform as _transform } from './transform';
 export const value = Schema.value;
 export const object = Schema.object;
 export const array = Schema.array;
-export type buildType <T extends Schema> = build<T, false>;
+export type buildType <T extends Schema, transformed extends boolean = true> = build<T, transformed>;
 
 export function check (schema: Schema, value): string | null {
     return _check(schema, value).orNull();
