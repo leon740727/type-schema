@@ -32,7 +32,7 @@ export class AtomSchema <VT, IsNullable, IsOptional, VT2> {
             SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform, this.extra);
     }
 
-    setTransform <T2> (fn: (v: stripUndefined<VT>) => T2) {
+    transformer <T2> (fn: (v: stripUndefined<VT>) => T2) {
         return new AtomSchema<VT, IsNullable, IsOptional, T2>(
             SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn, this.extra);
     }

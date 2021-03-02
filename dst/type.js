@@ -30,7 +30,7 @@ class AtomSchema {
     optional() {
         return new AtomSchema(SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform, this.extra);
     }
-    setTransform(fn) {
+    transformer(fn) {
         return new AtomSchema(SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn, this.extra);
     }
     setExtra(extra) {

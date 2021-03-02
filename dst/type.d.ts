@@ -21,7 +21,7 @@ export declare class AtomSchema<VT, IsNullable, IsOptional, VT2> {
     transform: (v: VT) => VT2, extra: any);
     nullable(): AtomSchema<VT, true, IsOptional, VT2>;
     optional(): AtomSchema<VT, IsNullable, true, VT2>;
-    setTransform<T2>(fn: (v: stripUndefined<VT>) => T2): AtomSchema<VT, IsNullable, IsOptional, T2>;
+    transformer<T2>(fn: (v: stripUndefined<VT>) => T2): AtomSchema<VT, IsNullable, IsOptional, T2>;
     setExtra(extra: any): AtomSchema<VT, IsNullable, IsOptional, VT2>;
 }
 export declare class ArraySchema<InnerSchema extends Schema, IsNullable, IsOptional> {
