@@ -1,17 +1,15 @@
-import { Schema as _Schema, build } from './type';
-export declare namespace Schema {
-    export const value: typeof _Schema.value;
-    export const object: typeof _Schema.object;
-    export const array: typeof _Schema.array;
-    export type buildType<T extends _Schema> = build<T, false>;
-    export function check(schema: _Schema, value: any): string | null;
-    type Result<R> = [string, null] | [null, R];
-    export function transform<S extends _Schema>(schema: S, value: any): Result<build<S, true>>;
-    export function any(): import("./type").AtomSchema<any, false, false, any>;
-    export function string(): import("./type").AtomSchema<string | undefined, false, false, string>;
-    export function number(): import("./type").AtomSchema<number | undefined, false, false, number>;
-    export function boolean(): import("./type").AtomSchema<boolean | undefined, false, false, boolean>;
-    export function bigint(): import("./type").AtomSchema<bigint | undefined, false, false, bigint>;
-    export function date(): import("./type").AtomSchema<Date | undefined, false, false, Date>;
-    export {};
-}
+import { Schema, build } from './type';
+export declare const value: typeof Schema.value;
+export declare const object: typeof Schema.object;
+export declare const array: typeof Schema.array;
+export declare type buildType<T extends Schema> = build<T, false>;
+export declare function check(schema: Schema, value: any): string | null;
+declare type Result<R> = [string, null] | [null, R];
+export declare function transform<S extends Schema>(schema: S, value: any): Result<build<S, true>>;
+export declare function any(): import("./type").AtomSchema<any, false, false, any>;
+export declare function string(): import("./type").AtomSchema<string | undefined, false, false, string>;
+export declare function number(): import("./type").AtomSchema<number | undefined, false, false, number>;
+export declare function boolean(): import("./type").AtomSchema<boolean | undefined, false, false, boolean>;
+export declare function bigint(): import("./type").AtomSchema<bigint | undefined, false, false, bigint>;
+export declare function date(): import("./type").AtomSchema<Date | undefined, false, false, Date>;
+export {};
