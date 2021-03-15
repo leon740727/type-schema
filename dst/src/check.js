@@ -18,6 +18,9 @@ function error2string(error) {
     }
 }
 function _check(schema, value) {
+    if (value === null && schema.isNullable) {
+        return types_1.Optional.empty();
+    }
     if (schema.type === type_1.SchemaType.object) {
         if (typeof value === 'object') {
             return checkObject(schema.innerSchema, value);

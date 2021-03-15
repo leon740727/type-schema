@@ -21,6 +21,9 @@ function error2string (error: Error) {
 }
 
 function _check (schema: Schema, value): Optional<Error> {
+    if (value === null && schema.isNullable) {
+        return Optional.empty();
+    }
     if (schema.type === SchemaType.object) {
         if (typeof value === 'object') {
             return checkObject(schema.innerSchema, value);

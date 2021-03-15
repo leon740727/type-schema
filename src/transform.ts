@@ -11,6 +11,9 @@ export function transform <S extends Schema> (schema: S, value): Result<string, 
 }
 
 function _transform <S extends Schema> (schema: S, value): build<S, true> {
+    if (value === null) {               // check() 已經確認過 null 是合法的
+        return null as build<S, true>;
+    }
     if (schema.type === SchemaType.atom) {
         return transformAtom(schema, value);
     } else if (schema.type === SchemaType.array) {

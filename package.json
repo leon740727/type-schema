@@ -2,14 +2,16 @@
   "name": "type-schema",
   "version": "0.0.1",
   "description": "",
-  "main": "dst/index.js",
+  "main": "dst/src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx mocha dst/test"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^14.14.34",
     "@types/ramda": "^0.27.38",
+    "mocha": "^8.3.2",
     "typescript": "^4.1.5"
   },
   "dependencies": {

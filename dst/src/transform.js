@@ -13,6 +13,9 @@ function transform(schema, value) {
 }
 exports.transform = transform;
 function _transform(schema, value) {
+    if (value === null) { // check() 已經確認過 null 是合法的
+        return null;
+    }
     if (schema.type === type_1.SchemaType.atom) {
         return transformAtom(schema, value);
     }
