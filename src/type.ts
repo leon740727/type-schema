@@ -1,3 +1,5 @@
+import { mergeRight } from 'ramda';
+
 /**
  * schema 有幾種類別
  * 1. atom: 沒有 inner schema 描述的值。例如 number, string ...
@@ -11,6 +13,8 @@ export enum SchemaType {
     object,         // compound object
 }
 
+type Attr = {[field: string]: any};
+
 export class AtomSchema <VT, IsNullable, IsOptional, VT2> {
     constructor (
         readonly type: SchemaType.atom,
@@ -19,27 +23,28 @@ export class AtomSchema <VT, IsNullable, IsOptional, VT2> {
         readonly isOptional: IsOptional,
         readonly isa: (v) => string | null,         // 傳回錯誤訊息
         readonly transform: (v: VT) => VT2,
-        readonly extra: any,                        // 額外附加的資料
+        readonly attr: Attr,                        // 額外附加的屬性
     ) {}
 
     nullable () {
         return new AtomSchema<VT, true, IsOptional, VT2> (
-            SchemaType.atom, this.value, true, this.isOptional, this.isa, this.transform, this.extra);
+            SchemaType.atom, this.value, true, this.isOptional, this.isa, this.transform, this.attr);
     }
 
     optional () {
         return new AtomSchema<VT, IsNullable, true, VT2> (
-            SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform, this.extra);
+            SchemaType.atom, this.value, this.isNullable, true, this.isa, this.transform, this.attr);
     }
 
     transformer <T2> (fn: (v: stripUndefined<VT>) => T2) {
         return new AtomSchema<VT, IsNullable, IsOptional, T2>(
-            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn, this.extra);
+            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn, this.attr);
     }
 
-    setExtra (extra) {
+    set (attr: Attr) {
+        const newAttr = mergeRight(this.attr, attr);
         return new AtomSchema<VT, IsNullable, IsOptional, VT2>(
-            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, this.transform, extra);
+            SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, this.transform, newAttr);
     }
 }
 
@@ -49,22 +54,23 @@ export class ArraySchema <InnerSchema extends Schema, IsNullable, IsOptional> {
         readonly innerSchema: InnerSchema,
         readonly isNullable: IsNullable,
         readonly isOptional: IsOptional,
-        readonly extra: any,                        // 額外附加的資料
+        readonly attr: Attr,                        // 額外附加的屬性
     ) {}
 
     nullable () {
         return new ArraySchema<InnerSchema, true, IsOptional> (
-            SchemaType.array, this.innerSchema, true, this.isOptional, this.extra);
+            SchemaType.array, this.innerSchema, true, this.isOptional, this.attr);
     }
 
     optional () {
         return new ArraySchema<InnerSchema, IsNullable, true> (
-            SchemaType.array, this.innerSchema, this.isNullable, true, this.extra);
+            SchemaType.array, this.innerSchema, this.isNullable, true, this.attr);
     }
 
-    setExtra (extra) {
+    set (attr: Attr) {
+        const newAttr = mergeRight(this.attr, attr);
         return new ArraySchema<InnerSchema, IsNullable, IsOptional> (
-            SchemaType.array, this.innerSchema, this.isNullable, this.isOptional, extra);
+            SchemaType.array, this.innerSchema, this.isNullable, this.isOptional, newAttr);
     }
 }
 
@@ -74,22 +80,23 @@ export class ObjectSchema <InnerSchema extends InnerSchemaForObjectSchema, IsNul
         readonly innerSchema: InnerSchema,
         readonly isNullable: IsNullable,
         readonly isOptional: IsOptional,
-        readonly extra: any,                        // 額外附加的資料
+        readonly attr: Attr,                        // 額外附加的屬性
     ) {}
 
     nullable () {
         return new ObjectSchema<InnerSchema, true, IsOptional> (
-            SchemaType.object, this.innerSchema, true, this.isOptional, this.extra);
+            SchemaType.object, this.innerSchema, true, this.isOptional, this.attr);
     }
 
     optional () {
         return new ObjectSchema<InnerSchema, IsNullable, true> (
-            SchemaType.object, this.innerSchema, this.isNullable, true, this.extra);
+            SchemaType.object, this.innerSchema, this.isNullable, true, this.attr);
     }
 
-    setExtra (extra) {
+    set (attr: Attr) {
+        const newAttr = mergeRight(this.attr, attr);
         return new ObjectSchema<InnerSchema, IsNullable, IsOptional> (
-            SchemaType.object, this.innerSchema, this.isNullable, this.isOptional, extra);
+            SchemaType.object, this.innerSchema, this.isNullable, this.isOptional, newAttr);
     }
 }
 
@@ -105,15 +112,15 @@ export type InnerSchemaForObjectSchema = {
 export namespace Schema {
     export function value <T> (isa: (v) => string | null) {
         return new AtomSchema<T | undefined, false, false, T>(
-            SchemaType.atom, undefined, false, false, isa, (v: T) => v, null);
+            SchemaType.atom, undefined, false, false, isa, (v: T) => v, {});
     }
 
     export function array <S extends Schema> (innerSchema: S) {
-        return new ArraySchema<S, false, false>(SchemaType.array, innerSchema, false, false, null);
+        return new ArraySchema<S, false, false>(SchemaType.array, innerSchema, false, false, {});
     }
 
     export function object <S extends InnerSchemaForObjectSchema> (innerSchema: S) {
-        return new ObjectSchema<S, false, false>(SchemaType.object, innerSchema, false, false, null);
+        return new ObjectSchema<S, false, false>(SchemaType.object, innerSchema, false, false, {});
     }
 }
 
