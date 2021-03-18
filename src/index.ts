@@ -2,6 +2,7 @@ import { Schema, build } from './type';
 import { check as _check } from './check';
 import { transform as _transform } from './transform';
 
+export { Schema, SchemaType } from './type';
 export const value = Schema.value;
 export const object = Schema.object;
 export const array = Schema.array;

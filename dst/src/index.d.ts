@@ -1,4 +1,5 @@
 import { Schema, build } from './type';
+export { Schema, SchemaType } from './type';
 export declare const value: typeof Schema.value;
 export declare const object: typeof Schema.object;
 export declare const array: typeof Schema.array;
@@ -12,4 +13,3 @@ export declare function number(): import("./type").AtomSchema<number | undefined
 export declare function boolean(): import("./type").AtomSchema<boolean | undefined, false, false, boolean>;
 export declare function bigint(): import("./type").AtomSchema<bigint | undefined, false, false, bigint>;
 export declare function date(): import("./type").AtomSchema<Date | undefined, false, false, Date>;
-export {};

@@ -1,9 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.date = exports.bigint = exports.boolean = exports.number = exports.string = exports.any = exports.transform = exports.check = exports.array = exports.object = exports.value = void 0;
+exports.date = exports.bigint = exports.boolean = exports.number = exports.string = exports.any = exports.transform = exports.check = exports.array = exports.object = exports.value = exports.SchemaType = exports.Schema = void 0;
 const type_1 = require("./type");
 const check_1 = require("./check");
 const transform_1 = require("./transform");
+var type_2 = require("./type");
+Object.defineProperty(exports, "Schema", { enumerable: true, get: function () { return type_2.Schema; } });
+Object.defineProperty(exports, "SchemaType", { enumerable: true, get: function () { return type_2.SchemaType; } });
 exports.value = type_1.Schema.value;
 exports.object = type_1.Schema.object;
 exports.array = type_1.Schema.array;
