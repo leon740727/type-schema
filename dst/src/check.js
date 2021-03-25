@@ -22,7 +22,7 @@ function _check(schema, value) {
         return types_1.Optional.empty();
     }
     if (schema.type === type_1.SchemaType.object) {
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && value !== null) { // typeof null === 'object'
             return checkObject(schema.innerSchema, value);
         }
         else {

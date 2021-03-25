@@ -54,3 +54,14 @@ describe('nullable field', () => {
         });
     });
 });
+it('pass null to a non-nullable schema', () => {
+    const arraySchema = Schema.array(Schema.string());
+    const objSchema = Schema.object({
+        name: Schema.string(),
+    });
+    assert.strictEqual(Schema.check(objSchema, null), 'is not an object');
+    const [_, m] = Schema.transform(objSchema, null);
+    assert.ok(m === null);
+    assert.strictEqual(Schema.check(arraySchema, null), 'is not an Array');
+    assert.strictEqual(Schema.check(Schema.string(), null), 'is not a string');
+});

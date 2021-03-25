@@ -25,7 +25,7 @@ function _check (schema: Schema, value): Optional<Error> {
         return Optional.empty();
     }
     if (schema.type === SchemaType.object) {
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && value !== null) {      // typeof null === 'object'
             return checkObject(schema.innerSchema, value);
         } else {
             return Optional.of({
