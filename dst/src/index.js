@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.date = exports.bigint = exports.boolean = exports.number = exports.string = exports.any = exports.transform = exports.check = exports.array = exports.object = exports.value = exports.SchemaType = exports.Schema = void 0;
+exports.enums = exports.date = exports.bigint = exports.boolean = exports.number = exports.string = exports.any = exports.transform = exports.check = exports.array = exports.object = exports.value = exports.SchemaType = exports.Schema = void 0;
 const type_1 = require("./type");
 const check_1 = require("./check");
 const transform_1 = require("./transform");
@@ -43,3 +43,7 @@ function date() {
     return exports.value((v) => v instanceof Date ? null : 'is not a Date');
 }
 exports.date = date;
+function enums(valids) {
+    return type_1.Schema.value(v => valids.includes(v) ? null : `not a valid enum value, value should be one of [${valids}]`);
+}
+exports.enums = enums;

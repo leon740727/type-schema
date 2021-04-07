@@ -43,3 +43,7 @@ export function bigint () {
 export function date () {
     return value<Date>((v) => v instanceof Date ? null : 'is not a Date');
 }
+
+export function enums <T extends number | string> (valids: T[]) {
+    return Schema.value<T>(v => valids.includes(v) ? null : `not a valid enum value, value should be one of [${valids}]`);
+}

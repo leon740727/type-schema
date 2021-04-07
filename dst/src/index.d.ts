@@ -13,3 +13,4 @@ export declare function number(): import("./type").AtomSchema<number | undefined
 export declare function boolean(): import("./type").AtomSchema<boolean | undefined, false, false, boolean>;
 export declare function bigint(): import("./type").AtomSchema<bigint | undefined, false, false, bigint>;
 export declare function date(): import("./type").AtomSchema<Date | undefined, false, false, Date>;
+export declare function enums<T extends number | string>(valids: T[]): import("./type").AtomSchema<T | undefined, false, false, T>;
