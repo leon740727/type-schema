@@ -1,6 +1,6 @@
 {
   "name": "type-schema",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dst/src/index.js",
   "scripts": {
@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "ramda": "^0.27.1",
-    "types": "git://github.com/leon740727/types.git#semver:~0.3.2"
+    "types": "https://github.com/leon740727/types.git#semver:~0.3.2"
   }
 }
