@@ -124,17 +124,6 @@ export namespace Schema {
     }
 }
 
-type isRequired <S, T> = T extends { isOptional: false } ? S : never;
-type isOptional <S, T> = T extends { isOptional: true } ? S : never;
-
-type requiredFields <T extends InnerSchemaForObjectSchema, transformed extends boolean> = {
-    [f in keyof T as isRequired<f, T[f]>]: build<T[f], transformed>;
-}
-
-type optionalFields <T extends InnerSchemaForObjectSchema, transformed extends boolean> = {
-    [f in keyof T as isOptional<f, T[f]>]?: build<T[f], transformed>;
-}
-
 type _stripUndefined <T> = T extends undefined ? never : T;
 type stripUndefined <T> = _stripUndefined<T> extends never ? T : _stripUndefined<T>;
 
@@ -144,7 +133,7 @@ export type fetchObject <T extends Schema> = T extends { type: SchemaType.object
 
 type _build <T extends Schema, transformed extends boolean> =
     T extends { type: SchemaType.object } ?
-        requiredFields<fetchObject<T>['innerSchema'], transformed> & optionalFields<fetchObject<T>['innerSchema'], transformed>:
+        BuildObj<fetchObject<T>['innerSchema'], transformed>:
     T extends { type: SchemaType.array } ?            // array
         build<fetchArray<T>['innerSchema'], transformed>[]:
     transformed extends true ?
@@ -153,3 +142,9 @@ type _build <T extends Schema, transformed extends boolean> =
 
 export type build <T extends Schema, transformed extends boolean> = T extends { isNullable: true } ?
     _build<T, transformed> | null: _build<T, transformed>;
+
+type BuildObj <OS extends InnerSchemaForObjectSchema, transformed extends boolean> = {
+    [f in keyof OS]: OS[f] extends { isOptional: true }
+        ? build<OS[f], transformed> | undefined
+        : build<OS[f], transformed>
+};
