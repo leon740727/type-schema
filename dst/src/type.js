@@ -13,6 +13,7 @@ var SchemaType;
     SchemaType[SchemaType["atom"] = 0] = "atom";
     SchemaType[SchemaType["array"] = 1] = "array";
     SchemaType[SchemaType["object"] = 2] = "object";
+    SchemaType[SchemaType["tuple"] = 3] = "tuple";
 })(SchemaType = exports.SchemaType || (exports.SchemaType = {}));
 class AtomSchema {
     constructor(type, value, isNullable, isOptional, isa, // 傳回錯誤訊息
@@ -83,6 +84,26 @@ class ObjectSchema {
     }
 }
 exports.ObjectSchema = ObjectSchema;
+class TupleSchema {
+    constructor(type, innerSchema, isNullable, isOptional, attr // 額外附加的屬性
+    ) {
+        this.type = type;
+        this.innerSchema = innerSchema;
+        this.isNullable = isNullable;
+        this.isOptional = isOptional;
+        this.attr = attr;
+    }
+    nullable() {
+        return new TupleSchema(SchemaType.tuple, this.innerSchema, true, this.isOptional, this.attr);
+    }
+    optional() {
+        return new TupleSchema(SchemaType.tuple, this.innerSchema, this.isNullable, true, this.attr);
+    }
+    set(attr) {
+        const newAttr = (0, ramda_1.mergeRight)(this.attr, attr);
+        return new TupleSchema(SchemaType.tuple, this.innerSchema, this.isNullable, this.isOptional, newAttr);
+    }
+}
 var Schema;
 (function (Schema) {
     function value(isa) {
@@ -97,4 +118,8 @@ var Schema;
         return new ObjectSchema(SchemaType.object, innerSchema, false, false, {});
     }
     Schema.object = object;
+    function tuple(schemas) {
+        return new TupleSchema(SchemaType.tuple, schemas, false, false, {});
+    }
+    Schema.tuple = tuple;
 })(Schema = exports.Schema || (exports.Schema = {}));

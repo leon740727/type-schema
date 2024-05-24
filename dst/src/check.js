@@ -48,6 +48,18 @@ function _check(schema, value) {
             });
         }
     }
+    else if (schema.type === type_1.SchemaType.tuple) {
+        if (value instanceof Array) {
+            (0, util_1.assert)(schema.innerSchema, "tuple inner schema is null or undefined");
+            return checkTuple(schema.innerSchema, value);
+        }
+        else {
+            return types_1.Optional.of({
+                paths: [],
+                msg: "is not a tuple",
+            });
+        }
+    }
     else {
         return checkAtom(schema, value);
     }
@@ -76,6 +88,18 @@ function checkArray(schema, value) {
         paths: [],
         msg: `array item ${idx} is wrong (${error2string(error)})`,
     }));
+}
+function checkTuple(schemas, values) {
+    if (schemas.length !== values.length) {
+        return types_1.Optional.of({ paths: [], msg: "tuple size error" });
+    }
+    else {
+        const errors = (0, ramda_1.zip)(schemas, values).map(([schema, value], idx) => _check(schema, value).map((error) => ({
+            paths: [],
+            msg: `tuple item ${idx} is wrong (${error2string(error)})`,
+        })));
+        return types_1.Optional.of(types_1.Optional.filter(errors)[0]);
+    }
 }
 function checkAtom(schema, value) {
     return types_1.Optional.of(schema.isa(value)).map((msg) => ({

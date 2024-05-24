@@ -1,4 +1,4 @@
-import { toPairs } from "ramda";
+import { toPairs, zip } from "ramda";
 import { Optional } from "types";
 import {
   Schema,
@@ -52,6 +52,16 @@ function _check(schema: Schema, value): Optional<Error> {
         msg: "is not an Array",
       });
     }
+  } else if (schema.type === SchemaType.tuple) {
+    if (value instanceof Array) {
+      assert(schema.innerSchema, "tuple inner schema is null or undefined");
+      return checkTuple(schema.innerSchema, value);
+    } else {
+      return Optional.of({
+        paths: [],
+        msg: "is not a tuple",
+      });
+    }
   } else {
     return checkAtom(schema, value);
   }
@@ -90,6 +100,21 @@ function checkArray(schema: Schema, value: any[]): Optional<Error> {
     paths: [],
     msg: `array item ${idx} is wrong (${error2string(error)})`,
   }));
+}
+
+function checkTuple(schemas: Schema[], values: any[]): Optional<Error> {
+  if (schemas.length !== values.length) {
+    return Optional.of({ paths: [], msg: "tuple size error" });
+  } else {
+    const errors = zip(schemas, values).map(([schema, value], idx) =>
+      _check(schema, value).map((error) => ({
+        paths: [],
+        msg: `tuple item ${idx} is wrong (${error2string(error)})`,
+      }))
+    );
+
+    return Optional.of(Optional.filter(errors)[0]);
+  }
 }
 
 function checkAtom(schema: AtomSchema<any, any>, value): Optional<Error> {

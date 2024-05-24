@@ -6,6 +6,7 @@ export { Schema, SchemaType } from "./type";
 export const value = Schema.value;
 export const object = Schema.object;
 export const array = Schema.array;
+export const tuple = Schema.tuple;
 export type buildType<
   T extends Schema,
   transformed extends boolean = true
@@ -21,6 +22,7 @@ export function transform<S extends Schema>(
   value
 ): Result<build<S, true>> {
   return _transform(schema, value).either(
+    //@ts-ignore
     (error) => [error, null] as Result<build<S, true>>,
     (value) => [null, value]
   );

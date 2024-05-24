@@ -3,6 +3,7 @@ export { Schema, SchemaType } from "./type";
 export declare const value: typeof Schema.value;
 export declare const object: typeof Schema.object;
 export declare const array: typeof Schema.array;
+export declare const tuple: typeof Schema.tuple;
 export type buildType<T extends Schema, transformed extends boolean = true> = build<T, transformed>;
 export declare function check(schema: Schema, value: any): string | null;
 type Result<R> = [string, null] | [null, R];

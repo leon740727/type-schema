@@ -26,6 +26,9 @@ function _transform(schema, value) {
     else if (schema.type === type_1.SchemaType.array) {
         return transformArray(schema, value);
     }
+    else if (schema.type === type_1.SchemaType.tuple) {
+        return transformTuple(schema, value);
+    }
     else {
         return transformObject(schema, value);
     }
@@ -34,7 +37,14 @@ function transformAtom(schema, value) {
     return schema.transform(value);
 }
 function transformArray(schema, values) {
+    (0, util_1.assert)(schema.type === type_1.SchemaType.array, "");
+    //@ts-ignore
     return values.map((value) => _transform(schema.itemSchema, value));
+}
+function transformTuple(schema, values) {
+    (0, util_1.assert)(schema.type === type_1.SchemaType.tuple, "");
+    (0, util_1.assert)(schema.innerSchema, "");
+    return (0, ramda_1.zip)(schema.innerSchema, values).map(([schema, value]) => _transform(schema, value));
 }
 function transformObject(schema, value) {
     const innerSchema = schema.innerSchema;

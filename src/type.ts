@@ -11,6 +11,7 @@ export enum SchemaType {
   atom,
   array, // compound array
   object, // compound object
+  tuple,
 }
 
 type Attr = { [field: string]: any };
@@ -164,9 +165,53 @@ export class ObjectSchema<
   }
 }
 
+class TupleSchema<
+  InnerSchema extends [Schema, ...Schema[]] | null | undefined
+> {
+  constructor(
+    readonly type: SchemaType.tuple,
+    readonly innerSchema: InnerSchema,
+    readonly isNullable: boolean,
+    readonly isOptional: boolean,
+    readonly attr: Attr // 額外附加的屬性
+  ) {}
+
+  nullable() {
+    return new TupleSchema<InnerSchema | null>(
+      SchemaType.tuple,
+      this.innerSchema,
+      true,
+      this.isOptional,
+      this.attr
+    );
+  }
+
+  optional() {
+    return new TupleSchema<InnerSchema | undefined>(
+      SchemaType.tuple,
+      this.innerSchema,
+      this.isNullable,
+      true,
+      this.attr
+    );
+  }
+
+  set(attr: Attr) {
+    const newAttr = mergeRight(this.attr, attr);
+    return new TupleSchema<InnerSchema>(
+      SchemaType.tuple,
+      this.innerSchema,
+      this.isNullable,
+      this.isOptional,
+      newAttr
+    );
+  }
+}
+
 export type Schema =
   | AtomSchema<any, any>
   | ArraySchema<InnerSchemaForArraySchema | null | undefined>
+  | TupleSchema<[Schema, ...Schema[]] | null | undefined>
   | ObjectSchema<InnerSchemaForObjectSchema | null | undefined>;
 
 type InnerSchemaForArraySchema = Schema[];
@@ -201,6 +246,10 @@ export namespace Schema {
       {}
     );
   }
+
+  export function tuple<tuple extends [Schema, ...Schema[]]>(schemas: tuple) {
+    return new TupleSchema<tuple>(SchemaType.tuple, schemas, false, false, {});
+  }
 }
 
 export type fetchAtom<T extends Schema> = T extends { type: SchemaType.atom }
@@ -214,6 +263,7 @@ export type fetchObject<T extends Schema> = T extends {
 }
   ? T
   : never;
+export type fetchTuple<T extends Schema> = Extract<T, TupleSchema<any>>;
 
 export type build<S extends Schema, transformed extends boolean> = S extends {
   type: SchemaType.object;
@@ -221,6 +271,8 @@ export type build<S extends Schema, transformed extends boolean> = S extends {
   ? buildObj<fetchObject<S>["innerSchema"], transformed>
   : S extends { type: SchemaType.array }
   ? buildArray<fetchArray<S>["innerSchema"], transformed>
+  : S extends { type: SchemaType.tuple }
+  ? buildTuple<fetchTuple<S>["innerSchema"], transformed>
   : S extends { type: SchemaType.atom }
   ? buildAtom<fetchAtom<S>, transformed>
   : never;
@@ -237,6 +289,16 @@ type buildArray<
   transformed extends boolean
 > = S extends InnerSchemaForArraySchema ? build<S[number], transformed>[] : S;
 
+type buildTuple<
+  S extends any[] | null | undefined,
+  transformed extends boolean
+> = S extends [Schema, ...Schema[]]
+  ? [
+      build<resolveTuple<S>[0], transformed>,
+      ...buildTuple<resolveTuple<S>[1], transformed>
+    ]
+  : S;
+
 type buildAtom<
   S extends Schema | null | undefined,
   transformed extends boolean
@@ -247,3 +309,5 @@ type buildAtom<
         | Extract<fetchAtom<S>["value"], null | undefined>
     : fetchAtom<S>["value"]
   : S;
+
+type resolveTuple<tuple> = tuple extends [infer h, ...infer r] ? [h, r] : never;
