@@ -1,5 +1,5 @@
-import { Schema, build } from './type';
-export { Schema, SchemaType } from './type';
+import { Schema, build } from "./type";
+export { Schema, SchemaType } from "./type";
 export declare const value: typeof Schema.value;
 export declare const object: typeof Schema.object;
 export declare const array: typeof Schema.array;

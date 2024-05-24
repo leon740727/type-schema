@@ -11,7 +11,7 @@ function check(schema, value) {
 exports.check = check;
 function error2string(error) {
     if (error.paths.length > 0) {
-        return `obj.${error.paths.join('.')} ${error.msg}`;
+        return `obj.${error.paths.join(".")} ${error.msg}`;
     }
     else {
         return error.msg;
@@ -25,14 +25,15 @@ function _check(schema, value) {
         return types_1.Optional.empty();
     }
     if (schema.type === type_1.SchemaType.object) {
-        if (typeof value === 'object' && value !== null) { // typeof null === 'object'
-            (0, util_1.assert)(schema.innerSchema, 'object inner schema is null or undefined');
+        if (typeof value === "object" && value !== null) {
+            // typeof null === 'object'
+            (0, util_1.assert)(schema.innerSchema, "object inner schema is null or undefined");
             return checkObject(schema.innerSchema, value);
         }
         else {
             return types_1.Optional.of({
                 paths: [],
-                msg: 'is not an object',
+                msg: "is not an object",
             });
         }
     }
@@ -43,7 +44,7 @@ function _check(schema, value) {
         else {
             return types_1.Optional.of({
                 paths: [],
-                msg: 'is not an Array',
+                msg: "is not an Array",
             });
         }
     }
@@ -55,14 +56,12 @@ function checkObject(schema, value) {
     // schema 沒有規範到的欄位不檢查
     const toChecks = (0, ramda_1.toPairs)(schema)
         .filter(([field, schema]) => {
-        return schema.isOptional === false ||
-            (schema.isOptional && value[field] !== undefined);
+        return (schema.isOptional === false ||
+            (schema.isOptional && value[field] !== undefined));
     })
         .map(([field, schema]) => [field, schema]);
-    const errors = toChecks
-        .map(([field, schema]) => {
-        return _check(schema, value[field])
-            .map(error => ({
+    const errors = toChecks.map(([field, schema]) => {
+        return _check(schema, value[field]).map((error) => ({
             paths: [field].concat(error.paths),
             msg: error.msg,
         }));
@@ -70,20 +69,16 @@ function checkObject(schema, value) {
     return types_1.Optional.of(types_1.Optional.filter(errors)[0]);
 }
 function checkArray(schema, value) {
-    const errors = value
-        .map((v, idx) => {
-        return _check(schema, v)
-            .map(error => (0, util_1.pair)(idx, error));
+    const errors = value.map((v, idx) => {
+        return _check(schema, v).map((error) => (0, util_1.pair)(idx, error));
     });
-    return types_1.Optional.of(types_1.Optional.filter(errors)[0])
-        .map(([idx, error]) => ({
+    return types_1.Optional.of(types_1.Optional.filter(errors)[0]).map(([idx, error]) => ({
         paths: [],
         msg: `array item ${idx} is wrong (${error2string(error)})`,
     }));
 }
 function checkAtom(schema, value) {
-    return types_1.Optional.of(schema.isa(value))
-        .map(msg => ({
+    return types_1.Optional.of(schema.isa(value)).map((msg) => ({
         paths: [],
         msg,
     }));

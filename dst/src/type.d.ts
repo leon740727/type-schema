@@ -71,14 +71,14 @@ export type fetchObject<T extends Schema> = T extends {
 } ? T : never;
 export type build<S extends Schema, transformed extends boolean> = S extends {
     type: SchemaType.object;
-} ? buildObj<fetchObject<S>['innerSchema'], transformed> : S extends {
+} ? buildObj<fetchObject<S>["innerSchema"], transformed> : S extends {
     type: SchemaType.array;
-} ? buildArray<fetchArray<S>['innerSchema'], transformed> : S extends {
+} ? buildArray<fetchArray<S>["innerSchema"], transformed> : S extends {
     type: SchemaType.atom;
 } ? buildAtom<fetchAtom<S>, transformed> : never;
 type buildObj<OS extends InnerSchemaForObjectSchema | null | undefined, transformed extends boolean> = OS extends InnerSchemaForObjectSchema ? {
     [f in keyof OS]: build<OS[f], transformed>;
 } : OS;
 type buildArray<S extends InnerSchemaForArraySchema | null | undefined, transformed extends boolean> = S extends InnerSchemaForArraySchema ? build<S[number], transformed>[] : S;
-type buildAtom<S extends Schema | null | undefined, transformed extends boolean> = S extends Schema ? transformed extends true ? ReturnType<fetchAtom<S>['transform']> | Extract<fetchAtom<S>['value'], null | undefined> : fetchAtom<S>['value'] : S;
+type buildAtom<S extends Schema | null | undefined, transformed extends boolean> = S extends Schema ? transformed extends true ? ReturnType<fetchAtom<S>["transform"]> | Extract<fetchAtom<S>["value"], null | undefined> : fetchAtom<S>["value"] : S;
 export {};

@@ -16,7 +16,8 @@ var SchemaType;
 })(SchemaType = exports.SchemaType || (exports.SchemaType = {}));
 class AtomSchema {
     constructor(type, value, isNullable, isOptional, isa, // 傳回錯誤訊息
-    transform, attr) {
+    transform, attr // 額外附加的屬性
+    ) {
         this.type = type;
         this.value = value;
         this.isNullable = isNullable;
@@ -41,7 +42,8 @@ class AtomSchema {
 }
 exports.AtomSchema = AtomSchema;
 class ArraySchema {
-    constructor(type, itemSchema, isNullable, isOptional, attr) {
+    constructor(type, itemSchema, isNullable, isOptional, attr // 額外附加的屬性
+    ) {
         this.type = type;
         this.itemSchema = itemSchema;
         this.isNullable = isNullable;
@@ -61,7 +63,8 @@ class ArraySchema {
 }
 exports.ArraySchema = ArraySchema;
 class ObjectSchema {
-    constructor(type, innerSchema, isNullable, isOptional, attr) {
+    constructor(type, innerSchema, isNullable, isOptional, attr // 額外附加的屬性
+    ) {
         this.type = type;
         this.innerSchema = innerSchema;
         this.isNullable = isNullable;
