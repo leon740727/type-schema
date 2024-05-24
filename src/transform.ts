@@ -2,7 +2,7 @@ import { fromPairs, mergeRight, toPairs } from 'ramda';
 import { Result } from 'types';
 import { Schema, SchemaType, build, fetchAtom, fetchArray, fetchObject } from './type';
 import { check } from './check';
-import { pair } from './util';
+import { assert, pair } from './util';
 
 export function transform <S extends Schema> (schema: S, value): Result<string, build<S, true>> {
     return check(schema, value)
@@ -13,6 +13,9 @@ export function transform <S extends Schema> (schema: S, value): Result<string, 
 function _transform <S extends Schema> (schema: S, value): build<S, true> {
     if (value === null) {               // check() 已經確認過 null 是合法的
         return null as build<S, true>;
+    }
+    if (value === undefined) {
+        return undefined as build<S, true>;
     }
     if (schema.type === SchemaType.atom) {
         return transformAtom(schema, value);
@@ -28,14 +31,16 @@ function transformAtom <S extends Schema> (schema: S, value): build<S, true> {
 }
 
 function transformArray <S extends Schema> (schema: S, values: any[]): build<S, true> {
-    return values.map(value => _transform((schema as fetchArray<Schema>).innerSchema, value)) as any;
+    return values.map(value => _transform((schema as fetchArray<Schema>).itemSchema, value)) as any;
 }
 
 function transformObject <S extends Schema> (
     schema: S,
     value: {[field: string]: any},
 ): build<S, true> {
-    const todos: [string, Schema][] = toPairs((schema as fetchObject<Schema>).innerSchema)
+    const innerSchema = (schema as fetchObject<Schema>).innerSchema;
+    assert(innerSchema, 'object inner schema is null or undefined');
+    const todos: [string, Schema][] = toPairs(innerSchema)
     .filter(([field, schema]) => {
         return schema.isOptional === false ||
             (schema.isOptional && value[field] !== undefined)

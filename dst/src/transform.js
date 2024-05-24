@@ -7,7 +7,7 @@ const type_1 = require("./type");
 const check_1 = require("./check");
 const util_1 = require("./util");
 function transform(schema, value) {
-    return check_1.check(schema, value)
+    return (0, check_1.check)(schema, value)
         .map(error => types_1.Result.fail(error))
         .orExec(() => types_1.Result.ok(_transform(schema, value)));
 }
@@ -15,6 +15,9 @@ exports.transform = transform;
 function _transform(schema, value) {
     if (value === null) { // check() 已經確認過 null 是合法的
         return null;
+    }
+    if (value === undefined) {
+        return undefined;
     }
     if (schema.type === type_1.SchemaType.atom) {
         return transformAtom(schema, value);
@@ -30,15 +33,17 @@ function transformAtom(schema, value) {
     return schema.transform(value);
 }
 function transformArray(schema, values) {
-    return values.map(value => _transform(schema.innerSchema, value));
+    return values.map(value => _transform(schema.itemSchema, value));
 }
 function transformObject(schema, value) {
-    const todos = ramda_1.toPairs(schema.innerSchema)
+    const innerSchema = schema.innerSchema;
+    (0, util_1.assert)(innerSchema, 'object inner schema is null or undefined');
+    const todos = (0, ramda_1.toPairs)(innerSchema)
         .filter(([field, schema]) => {
         return schema.isOptional === false ||
             (schema.isOptional && value[field] !== undefined);
     })
         .map(([field, schema]) => [field, schema]);
-    const v2 = ramda_1.fromPairs(todos.map(([field, schema]) => util_1.pair(field, _transform(schema, value[field]))));
-    return ramda_1.mergeRight(value, v2);
+    const v2 = (0, ramda_1.fromPairs)(todos.map(([field, schema]) => (0, util_1.pair)(field, _transform(schema, value[field]))));
+    return (0, ramda_1.mergeRight)(value, v2);
 }

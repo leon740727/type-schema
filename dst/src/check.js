@@ -21,8 +21,12 @@ function _check(schema, value) {
     if (value === null && schema.isNullable) {
         return types_1.Optional.empty();
     }
+    if (value === undefined && schema.isOptional) {
+        return types_1.Optional.empty();
+    }
     if (schema.type === type_1.SchemaType.object) {
         if (typeof value === 'object' && value !== null) { // typeof null === 'object'
+            (0, util_1.assert)(schema.innerSchema, 'object inner schema is null or undefined');
             return checkObject(schema.innerSchema, value);
         }
         else {
@@ -34,7 +38,7 @@ function _check(schema, value) {
     }
     else if (schema.type === type_1.SchemaType.array) {
         if (value instanceof Array) {
-            return checkArray(schema.innerSchema, value);
+            return checkArray(schema.itemSchema, value);
         }
         else {
             return types_1.Optional.of({
@@ -49,7 +53,7 @@ function _check(schema, value) {
 }
 function checkObject(schema, value) {
     // schema 沒有規範到的欄位不檢查
-    const toChecks = ramda_1.toPairs(schema)
+    const toChecks = (0, ramda_1.toPairs)(schema)
         .filter(([field, schema]) => {
         return schema.isOptional === false ||
             (schema.isOptional && value[field] !== undefined);
@@ -69,7 +73,7 @@ function checkArray(schema, value) {
     const errors = value
         .map((v, idx) => {
         return _check(schema, v)
-            .map(error => util_1.pair(idx, error));
+            .map(error => (0, util_1.pair)(idx, error));
     });
     return types_1.Optional.of(types_1.Optional.filter(errors)[0])
         .map(([idx, error]) => ({

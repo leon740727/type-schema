@@ -35,28 +35,28 @@ class AtomSchema {
         return new AtomSchema(SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, fn, this.attr);
     }
     set(attr) {
-        const newAttr = ramda_1.mergeRight(this.attr, attr);
+        const newAttr = (0, ramda_1.mergeRight)(this.attr, attr);
         return new AtomSchema(SchemaType.atom, this.value, this.isNullable, this.isOptional, this.isa, this.transform, newAttr);
     }
 }
 exports.AtomSchema = AtomSchema;
 class ArraySchema {
-    constructor(type, innerSchema, isNullable, isOptional, attr) {
+    constructor(type, itemSchema, isNullable, isOptional, attr) {
         this.type = type;
-        this.innerSchema = innerSchema;
+        this.itemSchema = itemSchema;
         this.isNullable = isNullable;
         this.isOptional = isOptional;
         this.attr = attr;
     }
     nullable() {
-        return new ArraySchema(SchemaType.array, this.innerSchema, true, this.isOptional, this.attr);
+        return new ArraySchema(SchemaType.array, this.itemSchema, true, this.isOptional, this.attr);
     }
     optional() {
-        return new ArraySchema(SchemaType.array, this.innerSchema, this.isNullable, true, this.attr);
+        return new ArraySchema(SchemaType.array, this.itemSchema, this.isNullable, true, this.attr);
     }
     set(attr) {
-        const newAttr = ramda_1.mergeRight(this.attr, attr);
-        return new ArraySchema(SchemaType.array, this.innerSchema, this.isNullable, this.isOptional, newAttr);
+        const newAttr = (0, ramda_1.mergeRight)(this.attr, attr);
+        return new ArraySchema(SchemaType.array, this.itemSchema, this.isNullable, this.isOptional, newAttr);
     }
 }
 exports.ArraySchema = ArraySchema;
@@ -75,7 +75,7 @@ class ObjectSchema {
         return new ObjectSchema(SchemaType.object, this.innerSchema, this.isNullable, true, this.attr);
     }
     set(attr) {
-        const newAttr = ramda_1.mergeRight(this.attr, attr);
+        const newAttr = (0, ramda_1.mergeRight)(this.attr, attr);
         return new ObjectSchema(SchemaType.object, this.innerSchema, this.isNullable, this.isOptional, newAttr);
     }
 }
@@ -83,11 +83,11 @@ exports.ObjectSchema = ObjectSchema;
 var Schema;
 (function (Schema) {
     function value(isa) {
-        return new AtomSchema(SchemaType.atom, undefined, false, false, isa, (v) => v, {});
+        return new AtomSchema(SchemaType.atom, null, false, false, isa, (v) => v, {});
     }
     Schema.value = value;
-    function array(innerSchema) {
-        return new ArraySchema(SchemaType.array, innerSchema, false, false, {});
+    function array(itemSchema) {
+        return new ArraySchema(SchemaType.array, itemSchema, false, false, {});
     }
     Schema.array = array;
     function object(innerSchema) {

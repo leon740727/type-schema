@@ -1,7 +1,7 @@
 import { toPairs } from 'ramda';
 import { Optional } from 'types';
 import { Schema, SchemaType, AtomSchema, InnerSchemaForObjectSchema } from './type';
-import { pair } from './util';
+import { assert, pair } from './util';
 
 type Error = {
     paths: string[],
@@ -24,8 +24,12 @@ function _check (schema: Schema, value): Optional<Error> {
     if (value === null && schema.isNullable) {
         return Optional.empty();
     }
+    if (value === undefined && schema.isOptional) {
+        return Optional.empty();
+    }
     if (schema.type === SchemaType.object) {
         if (typeof value === 'object' && value !== null) {      // typeof null === 'object'
+            assert(schema.innerSchema, 'object inner schema is null or undefined');
             return checkObject(schema.innerSchema, value);
         } else {
             return Optional.of({
@@ -35,7 +39,7 @@ function _check (schema: Schema, value): Optional<Error> {
         }
     } else if (schema.type === SchemaType.array) {
         if (value instanceof Array) {
-            return checkArray(schema.innerSchema, value);
+            return checkArray(schema.itemSchema, value);
         } else {
             return Optional.of({
                 paths: [],
@@ -82,7 +86,7 @@ function checkArray (schema: Schema, value: any[]): Optional<Error> {
     }));
 }
 
-function checkAtom (schema: AtomSchema<any, boolean, boolean, any>, value): Optional<Error> {
+function checkAtom (schema: AtomSchema<any, any>, value): Optional<Error> {
     return Optional.of(schema.isa(value))
     .map(msg => ({
         paths: [],
