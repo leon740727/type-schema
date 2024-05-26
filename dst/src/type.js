@@ -14,6 +14,7 @@ var SchemaType;
     SchemaType[SchemaType["array"] = 1] = "array";
     SchemaType[SchemaType["object"] = 2] = "object";
     SchemaType[SchemaType["tuple"] = 3] = "tuple";
+    SchemaType[SchemaType["union"] = 4] = "union";
 })(SchemaType = exports.SchemaType || (exports.SchemaType = {}));
 class AtomSchema {
     constructor(type, value, isNullable, isOptional, isa, // 傳回錯誤訊息
@@ -104,6 +105,26 @@ class TupleSchema {
         return new TupleSchema(SchemaType.tuple, this.innerSchema, this.isNullable, this.isOptional, newAttr);
     }
 }
+class UnionSchema {
+    constructor(type, innerSchema, isNullable, isOptional, attr // 額外附加的屬性
+    ) {
+        this.type = type;
+        this.innerSchema = innerSchema;
+        this.isNullable = isNullable;
+        this.isOptional = isOptional;
+        this.attr = attr;
+    }
+    nullable() {
+        return new UnionSchema(SchemaType.union, this.innerSchema, true, this.isOptional, this.attr);
+    }
+    optional() {
+        return new UnionSchema(SchemaType.union, this.innerSchema, this.isNullable, true, this.attr);
+    }
+    set(attr) {
+        const newAttr = (0, ramda_1.mergeRight)(this.attr, attr);
+        return new UnionSchema(SchemaType.union, this.innerSchema, this.isNullable, this.isOptional, newAttr);
+    }
+}
 var Schema;
 (function (Schema) {
     function value(isa) {
@@ -122,4 +143,8 @@ var Schema;
         return new TupleSchema(SchemaType.tuple, schemas, false, false, {});
     }
     Schema.tuple = tuple;
+    function union(schemas) {
+        return new UnionSchema(SchemaType.union, schemas, false, false, {});
+    }
+    Schema.union = union;
 })(Schema = exports.Schema || (exports.Schema = {}));

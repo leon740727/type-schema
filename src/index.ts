@@ -7,6 +7,7 @@ export const value = Schema.value;
 export const object = Schema.object;
 export const array = Schema.array;
 export const tuple = Schema.tuple;
+export const union = Schema.union;
 export type buildType<
   T extends Schema,
   transformed extends boolean = true

@@ -27,6 +27,8 @@ function _transform<S extends Schema>(schema: S, value): build<S, true> {
     return transformArray(schema, value);
   } else if (schema.type === SchemaType.tuple) {
     return transformTuple(schema, value);
+  } else if (schema.type === SchemaType.union) {
+    return transformUnion(schema, value);
   } else {
     return transformObject(schema, value);
   }
@@ -54,6 +56,20 @@ function transformTuple<S extends Schema>(
   return zip(schema.innerSchema, values).map(([schema, value]) =>
     _transform(schema, value)
   ) as any;
+}
+
+function transformUnion<S extends Schema>(
+  schema: S,
+  value: any
+): build<S, true> {
+  assert(schema.type === SchemaType.union, "");
+  assert(schema.innerSchema, "");
+  // 這裡不能用 _transform
+  // 因為 union 裡面的 schema 可能是錯的，但 _transform 假設每一個 schema 都是對的
+  const results = schema.innerSchema.map((schema) => transform(schema, value));
+  const oks = results.filter((i) => i.ok).map((i) => i.orError());
+  assert(oks.length > 0, "");
+  return oks[0];
 }
 
 function transformObject<S extends Schema>(

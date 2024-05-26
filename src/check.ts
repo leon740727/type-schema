@@ -1,4 +1,4 @@
-import { toPairs, zip } from "ramda";
+import { not, toPairs, zip } from "ramda";
 import { Optional } from "types";
 import {
   Schema,
@@ -62,6 +62,9 @@ function _check(schema: Schema, value): Optional<Error> {
         msg: "is not a tuple",
       });
     }
+  } else if (schema.type === SchemaType.union) {
+    assert(schema.innerSchema, "union inner schema is null or undefined");
+    return checkUnion(schema.innerSchema, value);
   } else {
     return checkAtom(schema, value);
   }
@@ -114,6 +117,25 @@ function checkTuple(schemas: Schema[], values: any[]): Optional<Error> {
     );
 
     return Optional.of(Optional.filter(errors)[0]);
+  }
+}
+
+function checkUnion(schemas: Schema[], value: any): Optional<Error> {
+  const success = schemas.reduce((success, schema) => {
+    if (success) {
+      return success;
+    } else {
+      const error = _check(schema, value);
+      return not(error.present);
+    }
+  }, false);
+  if (success) {
+    return Optional.empty();
+  } else {
+    return Optional.of({
+      paths: [],
+      msg: "not in union",
+    });
   }
 }
 

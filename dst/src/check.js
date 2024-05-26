@@ -60,6 +60,10 @@ function _check(schema, value) {
             });
         }
     }
+    else if (schema.type === type_1.SchemaType.union) {
+        (0, util_1.assert)(schema.innerSchema, "union inner schema is null or undefined");
+        return checkUnion(schema.innerSchema, value);
+    }
     else {
         return checkAtom(schema, value);
     }
@@ -99,6 +103,26 @@ function checkTuple(schemas, values) {
             msg: `tuple item ${idx} is wrong (${error2string(error)})`,
         })));
         return types_1.Optional.of(types_1.Optional.filter(errors)[0]);
+    }
+}
+function checkUnion(schemas, value) {
+    const success = schemas.reduce((success, schema) => {
+        if (success) {
+            return success;
+        }
+        else {
+            const error = _check(schema, value);
+            return (0, ramda_1.not)(error.present);
+        }
+    }, false);
+    if (success) {
+        return types_1.Optional.empty();
+    }
+    else {
+        return types_1.Optional.of({
+            paths: [],
+            msg: "not in union",
+        });
     }
 }
 function checkAtom(schema, value) {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.enums = exports.date = exports.bigint = exports.boolean = exports.number = exports.string = exports.any = exports.transform = exports.check = exports.tuple = exports.array = exports.object = exports.value = exports.SchemaType = exports.Schema = void 0;
+exports.enums = exports.date = exports.bigint = exports.boolean = exports.number = exports.string = exports.any = exports.transform = exports.check = exports.union = exports.tuple = exports.array = exports.object = exports.value = exports.SchemaType = exports.Schema = void 0;
 const type_1 = require("./type");
 const check_1 = require("./check");
 const transform_1 = require("./transform");
@@ -11,6 +11,7 @@ exports.value = type_1.Schema.value;
 exports.object = type_1.Schema.object;
 exports.array = type_1.Schema.array;
 exports.tuple = type_1.Schema.tuple;
+exports.union = type_1.Schema.union;
 function check(schema, value) {
     return (0, check_1.check)(schema, value).orNull();
 }

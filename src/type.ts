@@ -12,6 +12,7 @@ export enum SchemaType {
   array, // compound array
   object, // compound object
   tuple,
+  union,
 }
 
 type Attr = { [field: string]: any };
@@ -208,10 +209,52 @@ class TupleSchema<
   }
 }
 
+class UnionSchema<InnerSchema extends Schema[] | null | undefined> {
+  constructor(
+    readonly type: SchemaType.union,
+    readonly innerSchema: InnerSchema,
+    readonly isNullable: boolean,
+    readonly isOptional: boolean,
+    readonly attr: Attr // 額外附加的屬性
+  ) {}
+
+  nullable() {
+    return new UnionSchema<InnerSchema | null>(
+      SchemaType.union,
+      this.innerSchema,
+      true,
+      this.isOptional,
+      this.attr
+    );
+  }
+
+  optional() {
+    return new UnionSchema<InnerSchema | undefined>(
+      SchemaType.union,
+      this.innerSchema,
+      this.isNullable,
+      true,
+      this.attr
+    );
+  }
+
+  set(attr: Attr) {
+    const newAttr = mergeRight(this.attr, attr);
+    return new UnionSchema<InnerSchema>(
+      SchemaType.union,
+      this.innerSchema,
+      this.isNullable,
+      this.isOptional,
+      newAttr
+    );
+  }
+}
+
 export type Schema =
   | AtomSchema<any, any>
   | ArraySchema<InnerSchemaForArraySchema | null | undefined>
   | TupleSchema<[Schema, ...Schema[]] | null | undefined>
+  | UnionSchema<Schema[] | null | undefined>
   | ObjectSchema<InnerSchemaForObjectSchema | null | undefined>;
 
 type InnerSchemaForArraySchema = Schema[];
@@ -250,6 +293,10 @@ export namespace Schema {
   export function tuple<tuple extends [Schema, ...Schema[]]>(schemas: tuple) {
     return new TupleSchema<tuple>(SchemaType.tuple, schemas, false, false, {});
   }
+
+  export function union<union extends Schema[]>(schemas: union) {
+    return new UnionSchema<union>(SchemaType.union, schemas, false, false, {});
+  }
 }
 
 export type fetchAtom<T extends Schema> = T extends { type: SchemaType.atom }
@@ -264,6 +311,7 @@ export type fetchObject<T extends Schema> = T extends {
   ? T
   : never;
 export type fetchTuple<T extends Schema> = Extract<T, TupleSchema<any>>;
+export type fetchUnion<T extends Schema> = Extract<T, UnionSchema<any>>;
 
 export type build<S extends Schema, transformed extends boolean> = S extends {
   type: SchemaType.object;
@@ -273,6 +321,8 @@ export type build<S extends Schema, transformed extends boolean> = S extends {
   ? buildArray<fetchArray<S>["innerSchema"], transformed>
   : S extends { type: SchemaType.tuple }
   ? buildTuple<fetchTuple<S>["innerSchema"], transformed>
+  : S extends { type: SchemaType.union }
+  ? buildUnion<fetchUnion<S>["innerSchema"], transformed>
   : S extends { type: SchemaType.atom }
   ? buildAtom<fetchAtom<S>, transformed>
   : never;
@@ -298,6 +348,11 @@ type buildTuple<
       ...buildTuple<resolveTuple<S>[1], transformed>
     ]
   : S;
+
+type buildUnion<
+  S extends Schema[] | null | undefined,
+  transformed extends boolean
+> = S extends Schema[] ? build<S[number], transformed> : S;
 
 type buildAtom<
   S extends Schema | null | undefined,

@@ -29,6 +29,9 @@ function _transform(schema, value) {
     else if (schema.type === type_1.SchemaType.tuple) {
         return transformTuple(schema, value);
     }
+    else if (schema.type === type_1.SchemaType.union) {
+        return transformUnion(schema, value);
+    }
     else {
         return transformObject(schema, value);
     }
@@ -45,6 +48,16 @@ function transformTuple(schema, values) {
     (0, util_1.assert)(schema.type === type_1.SchemaType.tuple, "");
     (0, util_1.assert)(schema.innerSchema, "");
     return (0, ramda_1.zip)(schema.innerSchema, values).map(([schema, value]) => _transform(schema, value));
+}
+function transformUnion(schema, value) {
+    (0, util_1.assert)(schema.type === type_1.SchemaType.union, "");
+    (0, util_1.assert)(schema.innerSchema, "");
+    // 這裡不能用 _transform
+    // 因為 union 裡面的 schema 可能是錯的，但 _transform 假設每一個 schema 都是對的
+    const results = schema.innerSchema.map((schema) => transform(schema, value));
+    const oks = results.filter((i) => i.ok).map((i) => i.orError());
+    (0, util_1.assert)(oks.length > 0, "");
+    return oks[0];
 }
 function transformObject(schema, value) {
     const innerSchema = schema.innerSchema;
