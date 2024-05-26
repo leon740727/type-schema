@@ -1,4 +1,5 @@
 import { mergeRight } from "ramda";
+import { addQuestionMarks, flatten, resolveTuple } from "./util";
 
 /**
  * schema 有幾種類別
@@ -331,7 +332,7 @@ type buildObj<
   OS extends InnerSchemaForObjectSchema | null | undefined,
   transformed extends boolean
 > = OS extends InnerSchemaForObjectSchema
-  ? { [f in keyof OS]: build<OS[f], transformed> }
+  ? flatten<addQuestionMarks<{ [f in keyof OS]: build<OS[f], transformed> }>>
   : OS;
 
 type buildArray<
@@ -364,5 +365,3 @@ type buildAtom<
         | Extract<fetchAtom<S>["value"], null | undefined>
     : fetchAtom<S>["value"]
   : S;
-
-type resolveTuple<tuple> = tuple extends [infer h, ...infer r] ? [h, r] : never;

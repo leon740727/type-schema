@@ -1,3 +1,4 @@
+import { addQuestionMarks, flatten, resolveTuple } from "./util";
 /**
  * schema 有幾種類別
  * 1. atom: 沒有 inner schema 描述的值。例如 number, string ...
@@ -108,9 +109,9 @@ export type build<S extends Schema, transformed extends boolean> = S extends {
 } ? buildUnion<fetchUnion<S>["innerSchema"], transformed> : S extends {
     type: SchemaType.atom;
 } ? buildAtom<fetchAtom<S>, transformed> : never;
-type buildObj<OS extends InnerSchemaForObjectSchema | null | undefined, transformed extends boolean> = OS extends InnerSchemaForObjectSchema ? {
+type buildObj<OS extends InnerSchemaForObjectSchema | null | undefined, transformed extends boolean> = OS extends InnerSchemaForObjectSchema ? flatten<addQuestionMarks<{
     [f in keyof OS]: build<OS[f], transformed>;
-} : OS;
+}>> : OS;
 type buildArray<S extends InnerSchemaForArraySchema | null | undefined, transformed extends boolean> = S extends InnerSchemaForArraySchema ? build<S[number], transformed>[] : S;
 type buildTuple<S extends any[] | null | undefined, transformed extends boolean> = S extends [Schema, ...Schema[]] ? [
     build<resolveTuple<S>[0], transformed>,
@@ -118,5 +119,4 @@ type buildTuple<S extends any[] | null | undefined, transformed extends boolean>
 ] : S;
 type buildUnion<S extends Schema[] | null | undefined, transformed extends boolean> = S extends Schema[] ? build<S[number], transformed> : S;
 type buildAtom<S extends Schema | null | undefined, transformed extends boolean> = S extends Schema ? transformed extends true ? ReturnType<fetchAtom<S>["transform"]> | Extract<fetchAtom<S>["value"], null | undefined> : fetchAtom<S>["value"] : S;
-type resolveTuple<tuple> = tuple extends [infer h, ...infer r] ? [h, r] : never;
 export {};
